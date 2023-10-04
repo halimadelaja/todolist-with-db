@@ -1,10 +1,9 @@
-//jshint esversion:6
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const date = require(__dirname + "/public/js/date.js");
 const mongoose = require("mongoose");
 const _ = require("lodash")
+require('dotenv').config();
 
 const app = express();
 
@@ -17,8 +16,21 @@ app.use(express.static("public"));
 // const workItems = [];
 
 //connect to mongoose
-mongoose.connect("mongodb+srv://admin-halima:Test123@cluster0.lkqrg2p.mongodb.net/todolistDB?retryWrites=true&w=majority");
-//"mongodb+srv://admin-halima:Test123@cluster0.lkqrg2p.mongodb.net/todolistDB?retryWrites=true&w=majority"
+mongoose.connect(process.env.MONGO_DB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+
+db.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+db.once('open', () => {
+  console.log('Connected to MongoDB');
+});
+
 
 //Schema for Items
 const itemsSchema = new mongoose.Schema({
@@ -48,11 +60,11 @@ const listSchema = new mongoose.Schema({
 
 //Model for Lists Collection 
 const List = new mongoose.model("List", listSchema);
-
+const day = date.getDate();
 
 app.get("/", function(req, res) {
 
-  const day = date.getDate();
+  
 
   Item.find({}, function(err, foundItems){ //returns an array of objects
 
